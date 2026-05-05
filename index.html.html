@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema E.Q. — Diagnóstico de Equilibrio Empresarial</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --terra: #C4622D;
+  --terra-dk: #9a4a1f;
+  --terra-lt: rgba(196,98,45,0.12);
+  --night: #0e0e0e;
+  --charcoal: #1a1a1a;
+  --warm: #f5f0e8;
+  --off: #e8e3d8;
+  --white: #ffffff;
+  --grey: #6b6b6b;
+  --grey-lt: #2a2a2a;
+  --red: #c0392b;
+  --orange: #d35400;
+  --yellow: #d4a017;
+  --green: #27ae60;
+  --blue: #2471a3;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--night);
+  color: var(--white);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── SCREEN SYSTEM ── */
+.screen { display:none; min-height:100vh; }
+.screen.active { display:flex; flex-direction:column; }
+
+/* ── COVER ── */
+#cover {
+  background: var(--night);
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+  position: relative;
+  overflow: hidden;
+}
+#cover::before {
+  content: '';
+  position: absolute;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(196,98,45,0.15) 0%, transparent 70%);
+  top: -200px; right: -200px;
+  pointer-events: none;
+}
+#cover::after {
+  content: '';
+  position: absolute;
+  width: 400px; height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(196,98,45,0.08) 0%, transparent 70%);
+  bottom: -100px; left: -100px;
+  pointer-events: none;
+}
+.cover-inner { max-width: 560px; position: relative; z-index: 1; }
+.cover-badge {
+  display: inline-block;
+  background: var(--terra-lt);
+  border: 1px solid rgba(196,98,45,0.3);
+  color: var(--terra);
+  font-size: 11px; letter-spacing: 3px;
+  text-transform: uppercase; font-weight: 700;
+  padding: 6px 18px; border-radius: 20px;
+  margin-bottom: 28px;
+}
+.cover-logo {
+  font-size: 13px; letter-spacing: 4px;
+  text-transform: uppercase; color: var(--grey);
+  margin-bottom: 16px;
+}
+.cover-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(36px, 8vw, 64px);
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 10px;
+}
+.cover-title span { color: var(--terra); }
+.cover-subtitle {
+  font-size: clamp(28px, 5vw, 42px);
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 28px;
+  font-style: italic;
+}
+.cover-desc {
+  font-size: 15px; color: rgba(255,255,255,0.55);
+  line-height: 1.7; max-width: 420px;
+  margin: 0 auto 36px;
+}
+.cover-stats {
+  display: flex; gap: 24px;
+  justify-content: center;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+.cs { text-align: center; }
+.cs-n {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px; font-weight: 900;
+  color: var(--terra);
+}
+.cs-l { font-size: 11px; color: var(--grey); text-transform: uppercase; letter-spacing: 1px; }
+
+.btn-primary {
+  background: var(--terra);
+  color: var(--white);
+  border: none;
+  padding: 16px 40px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 700;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+.btn-primary:hover { background: var(--terra-dk); transform: translateY(-1px); }
+.btn-secondary {
+  background: transparent;
+  color: var(--white);
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 14px 32px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 600;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 12px;
+}
+.btn-secondary:hover { border-color: var(--terra); color: var(--terra); }
+
+.cover-by {
+  margin-top: 32px;
+  font-size: 12px; color: rgba(255,255,255,0.3);
+}
+.cover-by span { color: var(--terra); }
+
+/* ── ASSESSMENT ── */
+#assessment {
+  background: var(--night);
+  flex-direction: column;
+  align-items: stretch;
+}
+.assess-header {
+  background: var(--charcoal);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  position: sticky; top: 0; z-index: 10;
+}
+.assess-logo {
+  font-size: 13px; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--terra);
+  font-weight: 700;
+}
+.progress-wrap { flex: 1; max-width: 300px; margin: 0 24px; }
+.progress-label {
+  font-size: 11px; color: var(--grey);
+  display: flex; justify-content: space-between;
+  margin-bottom: 6px;
+}
+.progress-bar {
+  height: 4px; background: rgba(255,255,255,0.08);
+  border-radius: 4px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; background: var(--terra);
+  border-radius: 4px;
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+.pillar-tag {
+  font-size: 11px; font-weight: 700;
+  padding: 4px 12px; border-radius: 12px;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.pt-negocio { background: rgba(196,98,45,0.15); color: var(--terra); }
+.pt-marca { background: rgba(106,13,173,0.15); color: #b370e8; }
+.pt-fundador { background: rgba(39,174,96,0.15); color: #5abf85; }
+
+.assess-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+.question-card {
+  max-width: 640px; width: 100%;
+  animation: fadeUp 0.4s ease;
+}
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(20px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.q-meta {
+  font-size: 11px; color: var(--grey);
+  text-transform: uppercase; letter-spacing: 2px;
+  margin-bottom: 14px;
+}
+.q-text {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(20px,4vw,28px);
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 36px;
+  color: var(--white);
+}
+.q-options { display: flex; flex-direction: column; gap: 10px; }
+.q-option {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 12px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.q-option:hover {
+  background: rgba(196,98,45,0.08);
+  border-color: rgba(196,98,45,0.3);
+}
+.q-option.selected {
+  background: rgba(196,98,45,0.12);
+  border-color: var(--terra);
+}
+.q-option-score {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  color: var(--grey);
+  flex-shrink: 0; margin-top: 1px;
+  transition: all 0.2s;
+}
+.q-option.selected .q-option-score {
+  background: var(--terra);
+  border-color: var(--terra);
+  color: var(--white);
+}
+.q-option-text { font-size: 14px; line-height: 1.5; color: rgba(255,255,255,0.8); }
+.q-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+}
+.q-counter {
+  font-size: 13px; color: var(--grey);
+}
+.btn-next {
+  background: var(--terra);
+  color: var(--white);
+  border: none;
+  padding: 12px 28px;
+  border-radius: 50px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0.4;
+  pointer-events: none;
+}
+.btn-next.ready { opacity: 1; pointer-events: all; }
+.btn-next.ready:hover { background: var(--terra-dk); }
+
+/* ── PILLAR TRANSITION ── */
+#pillar-transition {
+  background: var(--night);
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+}
+.pt-card {
+  max-width: 500px;
+  animation: fadeUp 0.5s ease;
+}
+.pt-icon { font-size: 64px; margin-bottom: 20px; }
+.pt-label {
+  font-size: 11px; letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.pt-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px; font-weight: 900;
+  margin-bottom: 14px;
+}
+.pt-desc {
+  font-size: 15px; color: rgba(255,255,255,0.5);
+  line-height: 1.7; margin-bottom: 32px;
+}
+
+/* ── LOADING ── */
+#loading {
+  background: var(--night);
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+}
+.loading-inner { max-width: 400px; }
+.loading-ring {
+  width: 72px; height: 72px;
+  border: 3px solid rgba(196,98,45,0.2);
+  border-top-color: var(--terra);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 28px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px; margin-bottom: 10px;
+}
+.loading-sub { font-size: 14px; color: var(--grey); line-height: 1.6; }
+.loading-dots span {
+  display: inline-block;
+  animation: blink 1.4s infinite;
+  color: var(--terra);
+}
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%,80%,100%{opacity:0} 40%{opacity:1} }
+
+/* ── RESULTS ── */
+#results {
+  background: var(--night);
+  flex-direction: column;
+  align-items: stretch;
+}
+.results-header {
+  background: var(--charcoal);
+  padding: 20px 24px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.results-header-title {
+  font-size: 12px; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--terra);
+}
+
+.results-body {
+  max-width: 760px; margin: 0 auto;
+  padding: 40px 24px 60px;
+  width: 100%;
+}
+
+/* Profile Card */
+.profile-card {
+  background: var(--charcoal);
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 28px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.profile-header {
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.profile-icon { font-size: 52px; flex-shrink: 0; }
+.profile-info .profile-label {
+  font-size: 11px; letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.profile-info .profile-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px; font-weight: 900;
+  margin-bottom: 6px;
+}
+.profile-info .profile-sub {
+  font-size: 14px; color: rgba(255,255,255,0.55);
+  line-height: 1.5;
+}
+.profile-score-band {
+  padding: 20px 32px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.score-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 52px; font-weight: 900;
+  line-height: 1;
+}
+.score-meta { flex: 1; }
+.score-of { font-size: 13px; color: var(--grey); margin-bottom: 8px; }
+.score-bar-wrap {
+  background: rgba(255,255,255,0.06);
+  border-radius: 6px; height: 8px;
+  overflow: hidden;
+}
+.score-bar-fill {
+  height: 100%; border-radius: 6px;
+  transition: width 1.5s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Pillar Scores */
+.pillars-section { margin-bottom: 28px; }
+.section-title {
+  font-size: 11px; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--grey);
+  margin-bottom: 14px;
+}
+.pillar-scores { display: flex; flex-direction: column; gap: 12px; }
+.pillar-row {
+  background: var(--charcoal);
+  border-radius: 12px;
+  padding: 18px 22px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.pillar-row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.pillar-row-name { font-size: 14px; font-weight: 600; }
+.pillar-row-score { font-size: 13px; font-weight: 700; }
+.pillar-bar {
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px; height: 6px;
+  overflow: hidden;
+}
+.pillar-bar-fill {
+  height: 100%; border-radius: 4px;
+  transition: width 1.5s cubic-bezier(0.4,0,0.2,1) 0.3s;
+}
+
+/* Diagnosis */
+.diagnosis-card {
+  background: var(--charcoal);
+  border-radius: 16px;
+  padding: 26px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.diagnosis-card h3 {
+  font-size: 16px; font-weight: 700;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.diagnosis-card p {
+  font-size: 14px; color: rgba(255,255,255,0.65);
+  line-height: 1.7;
+}
+
+/* Action Plan */
+.action-plan {
+  background: var(--charcoal);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.action-plan-header {
+  background: var(--terra);
+  padding: 18px 24px;
+}
+.action-plan-header h3 {
+  font-size: 15px; font-weight: 700; color: var(--white);
+}
+.action-plan-header p {
+  font-size: 12px; color: rgba(255,255,255,0.7);
+  margin-top: 3px;
+}
+.action-items { padding: 6px 0; }
+.action-item {
+  display: flex;
+  gap: 14px;
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  align-items: flex-start;
+}
+.action-item:last-child { border-bottom: none; }
+.action-priority {
+  font-size: 10px; font-weight: 700;
+  padding: 3px 8px; border-radius: 8px;
+  text-transform: uppercase; letter-spacing: 1px;
+  white-space: nowrap; margin-top: 2px; flex-shrink: 0;
+}
+.ap-urgent { background: rgba(192,57,43,0.2); color: #e74c3c; }
+.ap-high { background: rgba(196,98,45,0.2); color: var(--terra); }
+.ap-medium { background: rgba(212,160,23,0.2); color: var(--yellow); }
+.ap-build { background: rgba(39,174,96,0.2); color: #27ae60; }
+.action-text { font-size: 13px; color: rgba(255,255,255,0.75); line-height: 1.6; }
+.action-text b { color: var(--white); font-weight: 600; }
+
+/* CTA Results */
+.results-cta {
+  background: linear-gradient(135deg, rgba(196,98,45,0.15), rgba(196,98,45,0.05));
+  border: 1px solid rgba(196,98,45,0.25);
+  border-radius: 16px;
+  padding: 28px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.results-cta h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; margin-bottom: 10px;
+}
+.results-cta p {
+  font-size: 14px; color: rgba(255,255,255,0.6);
+  margin-bottom: 20px; line-height: 1.6;
+}
+.cta-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+.btn-restart {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--white);
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-restart:hover { border-color: rgba(255,255,255,0.3); }
+
+/* Profile Colors */
+.profile-embrion .score-number,
+.profile-embrion .profile-label { color: var(--red); }
+.profile-embrion .score-bar-fill { background: var(--red); }
+
+.profile-caotico .score-number,
+.profile-caotico .profile-label { color: var(--orange); }
+.profile-caotico .score-bar-fill { background: var(--orange); }
+
+.profile-estancado .score-number,
+.profile-estancado .profile-label { color: var(--yellow); }
+.profile-estancado .score-bar-fill { background: var(--yellow); }
+
+.profile-construccion .score-number,
+.profile-construccion .profile-label { color: var(--green); }
+.profile-construccion .score-bar-fill { background: var(--green); }
+
+.profile-sistema .score-number,
+.profile-sistema .profile-label { color: var(--blue); }
+.profile-sistema .score-bar-fill { background: var(--blue); }
+
+@media (max-width: 600px) {
+  .profile-header { flex-direction: column; text-align: center; }
+  .profile-score-band { flex-direction: column; text-align: center; }
+  .assess-header { flex-wrap: wrap; gap: 10px; }
+  .progress-wrap { order: 3; max-width: 100%; flex: 0 0 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ SCREEN 1: COVER ══ -->
+<div class="screen active" id="cover">
+<div class="cover-inner">
+  <div class="cover-badge">Equilibrio Academy · Herramienta Diagnóstica</div>
+  <div class="cover-logo">Sistema E.Q.</div>
+  <h1 class="cover-title">¿Cómo está<br><span>tu negocio</span><br>de verdad?</h1>
+  <p class="cover-subtitle">Diagnóstico de Equilibrio<br>Empresarial</p>
+  <p class="cover-desc">45 preguntas · 3 pilares · 15 minutos.<br>Al terminar sabrás exactamente en qué área enfocarte primero — y tendrás un plan de acción concreto.</p>
+  <div class="cover-stats">
+    <div class="cs"><div class="cs-n">3</div><div class="cs-l">Pilares</div></div>
+    <div class="cs"><div class="cs-n">9</div><div class="cs-l">Dimensiones</div></div>
+    <div class="cs"><div class="cs-n">45</div><div class="cs-l">Preguntas</div></div>
+    <div class="cs"><div class="cs-n">5</div><div class="cs-l">Perfiles</div></div>
+  </div>
+  <button class="btn-primary" onclick="startAssessment()">Comenzar diagnóstico →</button>
+  <p class="cover-by">por <span>Leimar Gómez · @yosoy.lei</span> · Equilibrio Academy</p>
+</div>
+</div>
+
+<!-- ══ SCREEN 2: ASSESSMENT ══ -->
+<div class="screen" id="assessment">
+<div class="assess-header">
+  <div class="assess-logo">E.Q.</div>
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="progress-text">Pregunta 1 de 45</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+  <div class="pillar-tag" id="pillar-tag">Pilar 1</div>
+</div>
+<div class="assess-body">
+  <div class="question-card" id="question-card">
+    <div class="q-meta" id="q-meta"></div>
+    <div class="q-text" id="q-text"></div>
+    <div class="q-options" id="q-options"></div>
+    <div class="q-nav">
+      <div class="q-counter" id="q-counter"></div>
+      <button class="btn-next" id="btn-next" onclick="nextQuestion()">Siguiente →</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ SCREEN 3: PILLAR TRANSITION ══ -->
+<div class="screen" id="pillar-transition">
+<div class="pt-card">
+  <div class="pt-icon" id="pt-icon"></div>
+  <div class="pt-label" id="pt-label"></div>
+  <h2 class="pt-title" id="pt-title"></h2>
+  <p class="pt-desc" id="pt-desc"></p>
+  <button class="btn-primary" onclick="continuePillar()">Continuar →</button>
+</div>
+</div>
+
+<!-- ══ SCREEN 4: LOADING ══ -->
+<div class="screen" id="loading">
+<div class="loading-inner">
+  <div class="loading-ring"></div>
+  <h2 class="loading-title">Calculando tu diagnóstico</h2>
+  <p class="loading-sub">Analizando tus respuestas en los 3 pilares<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span></p>
+</div>
+</div>
+
+<!-- ══ SCREEN 5: RESULTS ══ -->
+<div class="screen" id="results">
+<div class="results-header">
+  <div class="results-header-title">Sistema E.Q. · Tu Diagnóstico de Equilibrio Empresarial</div>
+</div>
+<div class="results-body" id="results-body"></div>
+</div>
+
+<script>
+// ══ DATA ══
+const questions = [
+  // PILLAR 1: NEGOCIO
+  // Dim 1.1: Claridad del modelo
+  { pillar:1, pillarName:'Negocio', dim:'Modelo de Negocio', dimNum:1,
+    text:'¿Puedes explicar claramente cómo tu negocio genera dinero en 30 segundos?',
+    options:['No tengo claro cómo funciona mi modelo','Tengo una idea general pero no está definido','Lo tengo claro pero no documentado','Está completamente documentado y lo explico fácil']},
+  { pillar:1, pillarName:'Negocio', dim:'Modelo de Negocio', dimNum:2,
+    text:'¿Sabes exactamente qué problema resuelves y para quién?',
+    options:['Vendo cosas sin un cliente específico definido','Tengo una idea general de a quién le vendo','Sé a quién le vendo pero no tengo su perfil documentado','Tengo el perfil de mi cliente ideal completamente definido']},
+  { pillar:1, pillarName:'Negocio', dim:'Modelo de Negocio', dimNum:3,
+    text:'¿Qué tan diferenciado es tu negocio de la competencia?',
+    options:['Hago lo mismo que todos, solo compito en precio','Tengo algunas diferencias pero no las comunico bien','Me diferencio pero mi cliente no lo tiene claro','Tengo un diferenciador fuerte y claro para el cliente']},
+  { pillar:1, pillarName:'Negocio', dim:'Modelo de Negocio', dimNum:4,
+    text:'¿Tu negocio tiene al menos una fuente de ingreso recurrente o predecible?',
+    options:['Vivo de venta a venta sin nada recurrente','Tengo algunos clientes que repiten pero sin sistema','Tengo ingresos recurrentes pero no formalizados','Tengo un sistema de ingresos recurrentes funcionando']},
+  { pillar:1, pillarName:'Negocio', dim:'Modelo de Negocio', dimNum:5,
+    text:'¿Tienes documentado tu proceso de ventas paso a paso?',
+    options:['Improviso cada venta sin proceso definido','Tengo pasos mentales pero nada escrito','Tengo el proceso pero no está formalizado','Tengo un proceso documentado y lo sigo consistentemente']},
+
+  // Dim 1.2: Salud financiera
+  { pillar:1, pillarName:'Negocio', dim:'Salud Financiera', dimNum:6,
+    text:'¿Conoces el margen real de ganancia de cada producto o servicio que vendes?',
+    options:['No sé exactamente cuánto gano por cada cosa','Sé aproximadamente pero nunca lo he calculado bien','Lo he calculado alguna vez pero no lo reviso seguido','Conozco el margen exacto de todo lo que vendo']},
+  { pillar:1, pillarName:'Negocio', dim:'Salud Financiera', dimNum:7,
+    text:'¿Tienes separados los ingresos del negocio de tu dinero personal?',
+    options:['Todo va a la misma cuenta y no separo nada','Intento separar pero a veces mezclo','Los separo pero no tengo un sistema formal','Están completamente separados con sistema claro']},
+  { pillar:1, pillarName:'Negocio', dim:'Salud Financiera', dimNum:8,
+    text:'¿Sabes cuánto dinero necesita generar tu negocio cada mes para sostenerse?',
+    options:['No tengo calculado el punto de equilibrio','Tengo una idea aproximada pero no exacta','Lo calculé una vez pero no lo reviso regularmente','Lo tengo calculado y lo reviso mensualmente']},
+  { pillar:1, pillarName:'Negocio', dim:'Salud Financiera', dimNum:9,
+    text:'¿Registras cada ingreso y egreso de tu negocio?',
+    options:['No llevo registro de nada','Anoto algunas cosas pero de forma irregular','Registro la mayoría pero no soy consistente','Registro todo sin excepción en un sistema']},
+  { pillar:1, pillarName:'Negocio', dim:'Salud Financiera', dimNum:10,
+    text:'¿Tu negocio tiene un fondo de emergencia o capital de reserva?',
+    options:['No tengo ninguna reserva para el negocio','Tengo algo guardado pero sin criterio definido','Tengo reserva pero por debajo de lo que necesitaría','Tengo un fondo de emergencia de al menos 2 meses']},
+
+  // Dim 1.3: Capacidad operativa
+  { pillar:1, pillarName:'Negocio', dim:'Capacidad Operativa', dimNum:11,
+    text:'¿Tu negocio funcionaría una semana si tú no estuvieras disponible?',
+    options:['Sin mí todo se paraliza completamente','Alguien podría hacer lo básico pero con muchos problemas','Podría funcionar pero con mi supervisión a distancia','Tiene sistemas que funcionan sin depender de mí']},
+  { pillar:1, pillarName:'Negocio', dim:'Capacidad Operativa', dimNum:12,
+    text:'¿Tienes documentados los procesos principales de tu negocio?',
+    options:['Todo está en mi cabeza, nada documentado','Tengo algunas notas pero nada estructurado','Los principales procesos están escritos pero desactualizados','Tengo manuales actualizados de todos los procesos clave']},
+  { pillar:1, pillarName:'Negocio', dim:'Capacidad Operativa', dimNum:13,
+    text:'¿Tienes proveedores o alianzas que le dan estabilidad a tu negocio?',
+    options:['Improviso con lo que consigo sin proveedores fijos','Tengo algunos proveedores pero sin acuerdos formales','Tengo proveedores fijos pero todo depende de mí','Tengo acuerdos sólidos que le dan estabilidad al negocio']},
+  { pillar:1, pillarName:'Negocio', dim:'Capacidad Operativa', dimNum:14,
+    text:'¿Qué tan predecible es el flujo de trabajo de tu negocio semana a semana?',
+    options:['Cada semana es completamente diferente e impredecible','Hay cierta rutina pero muchas sorpresas','Es bastante predecible con algunas variaciones','Tengo ritmo estable y planifico con anticipación']},
+  { pillar:1, pillarName:'Negocio', dim:'Capacidad Operativa', dimNum:15,
+    text:'¿Puedes atender el doble de clientes actuales con los recursos que tienes?',
+    options:['Con el doble de clientes colapsaría totalmente','Podría pero con mucho caos y pérdida de calidad','Podría gestionar algo más con ajustes importantes','Tengo capacidad para crecer sin comprometer la calidad']},
+
+  // PILLAR 2: MARCA
+  // Dim 2.1: Posicionamiento
+  { pillar:2, pillarName:'Marca', dim:'Posicionamiento y Diferenciación', dimNum:16,
+    text:'¿Tu marca tiene una identidad visual consistente (colores, tipografía, estilo)?',
+    options:['No tengo identidad visual definida','Tengo algo pero no es consistente en todo','Tengo identidad definida pero no la aplico siempre','Mi marca es visualmente consistente en todos los puntos']},
+  { pillar:2, pillarName:'Marca', dim:'Posicionamiento y Diferenciación', dimNum:17,
+    text:'¿Tienes un mensaje claro que explique qué haces y para quién en menos de 10 segundos?',
+    options:['Cuando me preguntan qué hago tardo en explicarlo','Tengo una idea pero me cuesta resumirlo bien','Tengo el mensaje pero no siempre lo comunico igual','Tengo un mensaje claro, consistente y memorable']},
+  { pillar:2, pillarName:'Marca', dim:'Posicionamiento y Diferenciación', dimNum:18,
+    text:'¿Sabes exactamente en qué se diferencia tu oferta de la de tu competencia directa?',
+    options:['No analicé a mi competencia en detalle','Sé que me diferencio pero no lo tengo articulado','Conozco mis diferencias pero no las comunico activamente','Mis diferencias son claras y las comunico en todo momento']},
+  { pillar:2, pillarName:'Marca', dim:'Posicionamiento y Diferenciación', dimNum:19,
+    text:'¿Tus clientes podrían describir tu negocio claramente a alguien más?',
+    options:['Probablemente dirían cosas muy distintas entre sí','Tendrían la idea general pero con confusiones','Lo describirían bien pero sin énfasis en lo especial','Lo describirían igual que yo y destacando lo diferente']},
+  { pillar:2, pillarName:'Marca', dim:'Posicionamiento y Diferenciación', dimNum:20,
+    text:'¿Tienes testimonios o casos de éxito documentados de clientes reales?',
+    options:['No tengo testimonios documentados de nadie','Tengo algunos mensajes pero no los uso activamente','Tengo testimonios pero no están organizados visualmente','Tengo testimonios en video o texto listos para publicar']},
+
+  // Dim 2.2: Estrategia de marketing
+  { pillar:2, pillarName:'Marca', dim:'Estrategia de Marketing', dimNum:21,
+    text:'¿Tienes una estrategia de contenido definida para tus redes sociales?',
+    options:['Publico cuando puedo o cuando se me ocurre algo','Tengo ideas pero no hay un plan estructurado','Tengo un plan pero no lo sigo consistentemente','Tengo pilares de contenido y calendario definidos']},
+  { pillar:2, pillarName:'Marca', dim:'Estrategia de Marketing', dimNum:22,
+    text:'¿Sabes qué tipo de contenido le genera más clientes reales?',
+    options:['No analizo qué tipo de contenido convierte','Tengo intuición de qué funciona pero sin datos','He notado patrones pero no los he documentado','Sé exactamente qué contenido genera clientes y lo replico']},
+  { pillar:2, pillarName:'Marca', dim:'Estrategia de Marketing', dimNum:23,
+    text:'¿Tienes al menos un mecanismo para capturar contactos fuera de redes sociales?',
+    options:['Todo mi marketing depende de redes sociales','Tengo WhatsApp de algunos clientes pero sin sistema','Tengo lista de contactos pero no la trabajo activamente','Tengo email list o lista activa que trabajo regularmente']},
+  { pillar:2, pillarName:'Marca', dim:'Estrategia de Marketing', dimNum:24,
+    text:'¿Conoces el costo de adquisición de cada cliente nuevo?',
+    options:['No tengo idea de cuánto me cuesta conseguir un cliente','Sé que invierto tiempo pero no lo he calculado en dinero','Tengo una estimación pero no es precisa','Calculo el CAC regularmente y lo optimizo']},
+  { pillar:2, pillarName:'Marca', dim:'Estrategia de Marketing', dimNum:25,
+    text:'¿Tu presencia digital refleja la calidad real de lo que ofreces?',
+    options:['Lo que ofrezco es mejor que lo que se ve en línea','Hay diferencia pero no tanta','Se acerca bastante a lo que ofrezco','Mi presencia digital refleja exactamente mi nivel']},
+
+  // Dim 2.3: Sistema de ventas
+  { pillar:2, pillarName:'Marca', dim:'Sistema de Ventas', dimNum:26,
+    text:'¿Tienes un proceso definido desde el primer contacto hasta el cierre de venta?',
+    options:['Cada venta es diferente, improviso completamente','Tengo pasos mentales pero sin estructura formal','Tengo proceso definido pero no siempre lo sigo','Tengo proceso documentado y lo sigo en todas las ventas']},
+  { pillar:2, pillarName:'Marca', dim:'Sistema de Ventas', dimNum:27,
+    text:'¿Sabes manejar las 5 objeciones más comunes en tu negocio?',
+    options:['Cuando hay objeciones no sé bien cómo responder','Improviso en el momento sin preparación','Tengo respuestas pero no siempre son efectivas','Tengo respuestas probadas para cada objeción principal']},
+  { pillar:2, pillarName:'Marca', dim:'Sistema de Ventas', dimNum:28,
+    text:'¿Tienes estrategias para retener a los clientes que ya compraron?',
+    options:['No tengo nada específico para retener clientes','Intento dar buen servicio pero sin estrategia formal','Tengo algunas acciones pero no son sistemáticas','Tengo sistema activo de retención y recompra']},
+  { pillar:2, pillarName:'Marca', dim:'Sistema de Ventas', dimNum:29,
+    text:'¿Sabes cuánto vale un cliente para tu negocio a lo largo del tiempo?',
+    options:['Solo pienso en la venta inmediata, nada más','Sé que hay valor a largo plazo pero no lo he calculado','Tengo idea del valor pero no es un número exacto','Conozco el LTV de mis clientes y lo uso para decidir']},
+  { pillar:2, pillarName:'Marca', dim:'Sistema de Ventas', dimNum:30,
+    text:'¿Tienes métricas claras para medir si tu estrategia de ventas está funcionando?',
+    options:['Mido el éxito por si entró dinero o no','Reviso los números a veces pero sin indicadores fijos','Tengo algunos KPIs pero no los reviso regularmente','Tengo dashboard de métricas y las reviso semanalmente']},
+
+  // PILLAR 3: FUNDADOR
+  // Dim 3.1: Salud mental y energía
+  { pillar:3, pillarName:'Fundador', dim:'Salud Mental y Energía', dimNum:31,
+    text:'¿Cómo describirías tu nivel de energía promedio para trabajar en tu negocio?',
+    options:['Agotado la mayoría del tiempo, opero en modo supervivencia','Con altibajos fuertes, más días malos que buenos','Razonablemente bien aunque con momentos de sobrecarga','Con energía consistente y sé cómo recuperarla']},
+  { pillar:3, pillarName:'Fundador', dim:'Salud Mental y Energía', dimNum:32,
+    text:'¿Qué tan seguido sientes ansiedad o estrés relacionado a tu negocio?',
+    options:['Es constante, me afecta significativamente','Varias veces a la semana de forma notable','Ocasionalmente pero lo manejo bien','Rara vez y tengo herramientas para gestionarlo']},
+  { pillar:3, pillarName:'Fundador', dim:'Salud Mental y Energía', dimNum:33,
+    text:'¿Tienes momentos reales de desconexión del trabajo sin culpa?',
+    options:['No me permito desconectarme realmente nunca','A veces me desconecto pero con culpa o interrupciones','Tengo desconexión pero no es consistente','Tengo límites claros y me desconecto sin culpa']},
+  { pillar:3, pillarName:'Fundador', dim:'Salud Mental y Energía', dimNum:34,
+    text:'¿Cuándo tomas decisiones importantes en tu negocio, cómo está tu estado mental?',
+    options:['Suelo decidir bajo presión, estrés o agotamiento','A veces estoy bien, a veces no, es variable','Generalmente estoy en buen estado cuando decido','Cuido mi estado conscientemente antes de decidir']},
+  { pillar:3, pillarName:'Fundador', dim:'Salud Mental y Energía', dimNum:35,
+    text:'¿Duermes las horas necesarias y sientes que el descanso te recupera?',
+    options:['Duermo poco y me levanto cansado constantemente','Irregular, algunos días bien y otros muy mal','Casi siempre duermo suficiente aunque no perfectamente','Sí, tengo rutina de sueño consistente y me recupero bien']},
+
+  // Dim 3.2: Gestión del tiempo
+  { pillar:3, pillarName:'Fundador', dim:'Gestión del Tiempo', dimNum:36,
+    text:'¿Tienes claridad sobre cuáles son las 3 tareas más importantes de tu semana?',
+    options:['Voy resolviendo lo que surge sin plan previo','A veces tengo prioridades claras pero cambian mucho','Generalmente sé qué es prioritario pero lo mezclo con urgente','Siempre tengo mis 3 prioridades claras y las protejo']},
+  { pillar:3, pillarName:'Fundador', dim:'Gestión del Tiempo', dimNum:37,
+    text:'¿Delegas o externalizas tareas que no requieren de tu presencia específica?',
+    options:['Hago todo yo porque nadie lo haría igual que yo','He intentado delegar pero siempre termino haciéndolo yo','Delego algunas cosas pero podría delegar mucho más','Tengo sistema claro de qué delego y a quién']},
+  { pillar:3, pillarName:'Fundador', dim:'Gestión del Tiempo', dimNum:38,
+    text:'¿Cuánto tiempo dedicas a trabajar EN tu negocio vs. a pensar SOBRE tu negocio?',
+    options:['100% ejecución, nunca pienso estratégicamente','Casi todo es ejecución, rara vez pienso en la estrategia','Trato de equilibrar pero la ejecución siempre gana','Tengo bloques dedicados a pensar y no solo a ejecutar']},
+  { pillar:3, pillarName:'Fundador', dim:'Gestión del Tiempo', dimNum:39,
+    text:'¿Terminas la mayoría de tus días sintiendo que avanzaste en lo que importa?',
+    options:['Termino el día agotado pero sin saber qué logré','A veces sí, a veces siento que estuve "ocupado" sin avanzar','La mayoría de días siento progreso aunque no siempre','Sí, tengo claridad de mis logros diarios consistentemente']},
+  { pillar:3, pillarName:'Fundador', dim:'Gestión del Tiempo', dimNum:40,
+    text:'¿Tienes una rutina semanal que protege tu productividad?',
+    options:['No tengo rutina, cada semana es diferente e improvisada','Tengo intención de rutina pero rara vez la cumplo','Tengo rutina pero con muchas excepciones','Sí, tengo rutina sólida que sostengo la mayoría de semanas']},
+
+  // Dim 3.3: Conocimiento y habilidades
+  { pillar:3, pillarName:'Fundador', dim:'Conocimiento y Habilidades', dimNum:41,
+    text:'¿Qué tan actualizado estás en las tendencias y novedades de tu industria?',
+    options:['No leo ni me informo sobre mi industria regularmente','A veces me entero de cosas pero de forma muy casual','Me mantengo informado aunque no de forma sistemática','Tengo fuentes definidas y me actualizo regularmente']},
+  { pillar:3, pillarName:'Fundador', dim:'Conocimiento y Habilidades', dimNum:42,
+    text:'¿Inviertes regularmente en tu formación y desarrollo profesional?',
+    options:['No invierto en formarme, no tengo tiempo ni presupuesto','Ocasionalmente cuando surge algo interesante','Invierto algo pero sin un plan claro de formación','Tengo plan de formación y lo ejecuto consistentemente']},
+  { pillar:3, pillarName:'Fundador', dim:'Conocimiento y Habilidades', dimNum:43,
+    text:'¿Tienes claridad sobre cuáles son tus fortalezas reales y tus áreas de mejora?',
+    options:['No he hecho una evaluación honesta de mis capacidades','Tengo idea pero es más intuición que análisis','Conozco mis fortalezas y debilidades pero no actúo en ellas','Conozco mis capacidades y construyo estrategias basadas en eso']},
+  { pillar:3, pillarName:'Fundador', dim:'Conocimiento y Habilidades', dimNum:44,
+    text:'¿Cuentas con mentores, red de pares o comunidad que apoye tu crecimiento?',
+    options:['Emprendí completamente solo, sin red de apoyo','Tengo algunos contactos pero no hay apoyo real','Tengo algunas personas de referencia aunque sin formalidad','Tengo red activa de pares, mentores o comunidad de apoyo']},
+  { pillar:3, pillarName:'Fundador', dim:'Conocimiento y Habilidades', dimNum:45,
+    text:'¿Tienes metas claras y medibles para tu negocio en los próximos 90 días?',
+    options:['No tengo metas definidas, voy viendo qué pasa','Tengo metas vagas pero sin fechas ni métricas','Tengo metas pero no las reviso ni las mido activamente','Tengo metas SMART documentadas y las reviso semanalmente']},
+];
+
+const pillarTransitions = [
+  { icon:'📐', label:'Ahora exploramos el Pilar 2', labelColor:'#b370e8',
+    title:'Marca y Posicionamiento', tagClass:'pt-marca',
+    desc:'¿Tu negocio se diferencia claramente? ¿Tu cliente entiende por qué elegirte a ti? Vamos a evaluar tu estrategia de marca, marketing y ventas.' },
+  { icon:'💚', label:'Último pilar — el más importante', labelColor:'#5abf85',
+    title:'El Fundador como Pilar', tagClass:'pt-fundador',
+    desc:'Tu negocio crece hasta donde tú creces. Vamos a evaluar cómo estás tú — tu energía, tu tiempo y tu capacidad para sostener lo que estás construyendo.' }
+];
+
+const profiles = [
+  { id:'embrion', range:[0,54], emoji:'🌱', name:'El Negocio Embrión',
+    color:'#c0392b',
+    sub:'Tienes la pasión. Falta la estructura.',
+    desc:'Tu negocio está en sus etapas más tempranas en términos de sistemas. Hay movimiento pero todo depende de tu esfuerzo personal del día a día. La buena noticia: con las bases correctas, el crecimiento puede ser rápido.',
+    insight:'El problema no eres tú — es que nadie te enseñó a construir el sistema antes de construir el negocio.' },
+  { id:'caotico', range:[55,90], emoji:'🌀', name:'El Fundador Caótico',
+    color:'#d35400',
+    sub:'Hay movimiento pero sin dirección clara.',
+    desc:'Tu negocio genera actividad pero los resultados no son proporcionales al esfuerzo. Trabajas mucho y avanzas poco porque estás construyendo sin planos. Cada semana resuelves lo urgente y lo importante espera.',
+    insight:'El caos no es una etapa del emprendimiento — es la señal de que falta sistema.' },
+  { id:'estancado', range:[91,126], emoji:'🏔️', name:'El Emprendedor Estancado',
+    color:'#d4a017',
+    sub:'Tienes bases pero llegaste a un techo.',
+    desc:'Tu negocio funciona — eso es un logro real. Pero sientes que algo falla y no sabes exactamente qué. Has llegado hasta donde te permiten las herramientas que tienes. Para crecer necesitas nuevas.',
+    insight:'No estás estancado por falta de capacidad. Estás estancado porque el sistema que te trajo hasta aquí no es el que te lleva al siguiente nivel.' },
+  { id:'construccion', range:[127,162], emoji:'🏗️', name:'El Negocio en Construcción',
+    color:'#27ae60',
+    sub:'Va bien. Ahora toca sistematizar para crecer.',
+    desc:'Tienes bases sólidas en varias áreas. El negocio funciona y hay crecimiento. El reto ahora es dejar de depender de ti para ejecutar y construir los sistemas que permitan escalar sin quemarte.',
+    insight:'El siguiente paso no es trabajar más — es construir lo que funciona sin que estés en todo.' },
+  { id:'sistema', range:[163,180], emoji:'⚙️', name:'El Sistema Funcionando',
+    color:'#2471a3',
+    sub:'Tienes estructura. Es momento de escalar.',
+    desc:'Tu negocio tiene la base que la mayoría nunca construye. Tienes claridad en los tres pilares y los resultados lo reflejan. El foco ahora es la optimización, la escala y el impacto.',
+    insight:'Tienes lo que el 95% de los emprendedores latinoamericanos nunca construyó. Ahora es momento de multiplicarlo.' }
+];
+
+// ══ STATE ══
+let currentQ = 0;
+let answers = new Array(45).fill(null);
+let selectedOption = null;
+let pillarsDone = [false, false, false];
+let pendingTransition = false;
+
+// ══ FUNCTIONS ══
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startAssessment() {
+  showScreen('assessment');
+  renderQuestion(0);
+}
+
+function renderQuestion(idx) {
+  const q = questions[idx];
+  selectedOption = answers[idx];
+
+  // Pillar tag
+  const tagEl = document.getElementById('pillar-tag');
+  tagEl.textContent = `Pilar ${q.pillar}: ${q.pillarName}`;
+  tagEl.className = `pillar-tag pt-${q.pillarName.toLowerCase()}`;
+
+  // Progress
+  const pct = Math.round((idx / 45) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `Pregunta ${idx+1} de 45`;
+  document.getElementById('progress-pct').textContent = pct + '%';
+
+  // Q meta
+  document.getElementById('q-meta').textContent = `${q.pillarName} · ${q.dim}`;
+
+  // Q text
+  document.getElementById('q-text').textContent = q.text;
+
+  // Options
+  const opts = document.getElementById('q-options');
+  opts.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const div = document.createElement('div');
+    div.className = 'q-option' + (selectedOption === i ? ' selected' : '');
+    div.innerHTML = `<div class="q-option-score">${i+1}</div><div class="q-option-text">${opt}</div>`;
+    div.onclick = () => selectOption(i);
+    opts.appendChild(div);
+  });
+
+  // Counter
+  document.getElementById('q-counter').textContent = `${idx+1} / 45`;
+
+  // Next btn
+  const btn = document.getElementById('btn-next');
+  btn.className = 'btn-next' + (selectedOption !== null ? ' ready' : '');
+
+  // Animate
+  const card = document.getElementById('question-card');
+  card.style.animation = 'none';
+  card.offsetHeight;
+  card.style.animation = 'fadeUp 0.4s ease';
+}
+
+function selectOption(idx) {
+  selectedOption = idx;
+  answers[currentQ] = idx;
+  document.querySelectorAll('.q-option').forEach((el, i) => {
+    el.classList.toggle('selected', i === idx);
+  });
+  document.getElementById('btn-next').classList.add('ready');
+}
+
+function nextQuestion() {
+  if (selectedOption === null) return;
+
+  const q = questions[currentQ];
+  const nextIdx = currentQ + 1;
+
+  // Check if we just finished a pillar
+  if (currentQ === 14 && !pillarsDone[0]) {
+    pillarsDone[0] = true;
+    showPillarTransition(0, nextIdx);
+    return;
+  }
+  if (currentQ === 29 && !pillarsDone[1]) {
+    pillarsDone[1] = true;
+    showPillarTransition(1, nextIdx);
+    return;
+  }
+
+  if (nextIdx >= 45) {
+    // Done
+    showScreen('loading');
+    setTimeout(calculateResults, 2200);
+    return;
+  }
+
+  currentQ = nextIdx;
+  renderQuestion(currentQ);
+}
+
+function showPillarTransition(idx, nextIdx) {
+  const t = pillarTransitions[idx];
+  document.getElementById('pt-icon').textContent = t.icon;
+  const lbl = document.getElementById('pt-label');
+  lbl.textContent = t.label;
+  lbl.style.color = t.labelColor;
+  document.getElementById('pt-title').textContent = t.title;
+  document.getElementById('pt-desc').textContent = t.desc;
+
+  pendingTransition = nextIdx;
+  showScreen('pillar-transition');
+}
+
+function continuePillar() {
+  currentQ = pendingTransition;
+  selectedOption = answers[currentQ];
+  showScreen('assessment');
+  renderQuestion(currentQ);
+}
+
+function calculateResults() {
+  // Score by pillar
+  const p1 = answers.slice(0,15).reduce((s,a) => s + (a !== null ? a+1 : 0), 0);
+  const p2 = answers.slice(15,30).reduce((s,a) => s + (a !== null ? a+1 : 0), 0);
+  const p3 = answers.slice(30,45).reduce((s,a) => s + (a !== null ? a+1 : 0), 0);
+  const total = p1 + p2 + p3;
+  const maxP = 60; // 15 questions × 4
+
+  // Find profile
+  const profile = profiles.find(p => total >= p.range[0] && total <= p.range[1]) || profiles[profiles.length-1];
+
+  // Build results
+  buildResults(total, p1, p2, p3, maxP, profile);
+  showScreen('results');
+
+  // Animate bars after render
+  setTimeout(() => {
+    document.getElementById('main-score-fill').style.width = ((total/180)*100) + '%';
+    document.getElementById('p1-fill').style.width = ((p1/maxP)*100) + '%';
+    document.getElementById('p2-fill').style.width = ((p2/maxP)*100) + '%';
+    document.getElementById('p3-fill').style.width = ((p3/maxP)*100) + '%';
+  }, 100);
+}
+
+function buildResults(total, p1, p2, p3, maxP, profile) {
+  const pct = Math.round((total/180)*100);
+  const p1pct = Math.round((p1/maxP)*100);
+  const p2pct = Math.round((p2/maxP)*100);
+  const p3pct = Math.round((p3/maxP)*100);
+
+  // Identify weakest and strongest
+  const pillarData = [
+    { name:'Negocio', score:p1, pct:p1pct, color:'#C4622D' },
+    { name:'Marca', score:p2, pct:p2pct, color:'#b370e8' },
+    { name:'Fundador', score:p3, pct:p3pct, color:'#5abf85' }
+  ];
+  const sorted = [...pillarData].sort((a,b) => a.score - b.score);
+  const weakest = sorted[0];
+  const strongest = sorted[sorted.length-1];
+
+  // Generate action plan
+  const actionPlan = generateActionPlan(profile, p1pct, p2pct, p3pct);
+
+  const html = `
+    <!-- Profile Card -->
+    <div class="profile-card profile-${profile.id}">
+      <div class="profile-header">
+        <div class="profile-icon">${profile.emoji}</div>
+        <div class="profile-info">
+          <div class="profile-label">Tu perfil · Sistema E.Q.</div>
+          <div class="profile-name">${profile.name}</div>
+          <div class="profile-sub">${profile.sub}</div>
+        </div>
+      </div>
+      <div class="profile-score-band">
+        <div class="score-number">${total}</div>
+        <div class="score-meta">
+          <div class="score-of">de 180 puntos posibles · ${pct}% de equilibrio empresarial</div>
+          <div class="score-bar-wrap">
+            <div class="score-bar-fill" id="main-score-fill" style="width:0%;background:${profile.color}"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pillar Scores -->
+    <div class="pillars-section">
+      <div class="section-title">Resultado por pilar</div>
+      <div class="pillar-scores">
+        ${pillarData.map(p => `
+        <div class="pillar-row">
+          <div class="pillar-row-header">
+            <div class="pillar-row-name">${p.name === 'Negocio' ? '📐 Negocio' : p.name === 'Marca' ? '🎯 Marca' : '💚 Fundador'}</div>
+            <div class="pillar-row-score" style="color:${p.color}">${p.score} / ${maxP} (${p.pct}%)</div>
+          </div>
+          <div class="pillar-bar">
+            <div class="pillar-bar-fill" id="${p.name.toLowerCase()}-fill" style="width:0%;background:${p.color}"></div>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Diagnosis -->
+    <div class="diagnosis-card">
+      <h3>📋 Tu diagnóstico</h3>
+      <p>${profile.desc}</p>
+    </div>
+
+    <div class="diagnosis-card" style="border-color:rgba(196,98,45,0.2)">
+      <h3>💡 Lo que esto significa</h3>
+      <p>${profile.insight}</p>
+    </div>
+
+    <div class="diagnosis-card">
+      <h3>🔍 Tu área más crítica ahora mismo</h3>
+      <p>Tu pilar más débil es <strong>${weakest.name}</strong> con ${weakest.pct}% de desarrollo. Es el punto de mayor palanca — fortalecer aquí primero produce los resultados más rápidos. Tu mayor fortaleza es <strong>${strongest.name}</strong> con ${strongest.pct}%. Construye desde ahí.</p>
+    </div>
+
+    <!-- Action Plan -->
+    <div class="action-plan">
+      <div class="action-plan-header">
+        <h3>🗺️ Tu Plan de Acción</h3>
+        <p>Basado en tus respuestas · Ordenado por impacto y urgencia</p>
+      </div>
+      <div class="action-items">
+        ${actionPlan.map(a => `
+        <div class="action-item">
+          <div class="action-priority ap-${a.priority}">${a.label}</div>
+          <div class="action-text">${a.text}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="results-cta">
+      <h3>¿Quieres trabajar este plan con acompañamiento?</h3>
+      <p>Equilibrio Academy es el programa diseñado exactamente para llevar tu negocio del nivel donde está hoy al que siempre imaginaste — con el sistema que nadie te enseñó.</p>
+      <div class="cta-buttons">
+        <button class="btn-primary" onclick="window.open('https://instagram.com/yosoy.lei','_blank')">Escribir a @yosoy.lei →</button>
+        <button class="btn-restart" onclick="restartAssessment()">Hacer el diagnóstico de nuevo</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('results-body').innerHTML = html;
+
+  // Set IDs for animation
+  setTimeout(() => {
+    const p1el = document.getElementById('negocio-fill');
+    const p2el = document.getElementById('marca-fill');
+    const p3el = document.getElementById('fundador-fill');
+    if(p1el) p1el.style.width = p1pct + '%';
+    if(p2el) p2el.style.width = p2pct + '%';
+    if(p3el) p3el.style.width = p3pct + '%';
+  }, 200);
+}
+
+function generateActionPlan(profile, p1, p2, p3) {
+  const actions = [];
+
+  // Pilar 1: Negocio
+  if (p1 < 40) {
+    actions.push({ priority:'urgent', label:'Urgente', text:'<b>Define tu modelo de negocio en papel esta semana.</b> Responde en una hoja: ¿qué vendes, a quién, a qué precio, cómo se lo entregas y por qué te eligen a ti? Sin esto, todo lo demás está construido sobre arena.' });
+    actions.push({ priority:'urgent', label:'Urgente', text:'<b>Calcula tu punto de equilibrio hoy.</b> ¿Cuánto necesitas vender al mes para cubrir todos tus costos? Si no sabes este número, no sabes si tu negocio es viable.' });
+  } else if (p1 < 65) {
+    actions.push({ priority:'high', label:'Alta prioridad', text:'<b>Separa inmediatamente las finanzas del negocio de las personales.</b> Abre una cuenta o sobre exclusivo del negocio. Sin esta separación nunca sabrás si es rentable de verdad.' });
+    actions.push({ priority:'high', label:'Alta prioridad', text:'<b>Documenta los 3 procesos más repetitivos de tu operación.</b> Escríbelos paso a paso. Esto te prepara para delegar y sistematizar.' });
+  } else {
+    actions.push({ priority:'build', label:'Construcción', text:'<b>Evalúa si puedes atender el doble de clientes sin comprometer la calidad.</b> Si la respuesta es no, identifica el cuello de botella y elimínalo antes de crecer.' });
+  }
+
+  // Pilar 2: Marca
+  if (p2 < 40) {
+    actions.push({ priority:'urgent', label:'Urgente', text:'<b>Define tu cliente ideal en una frase específica esta semana.</b> Edad, situación, dolor principal, por qué te compraría. Sin esto, tu marketing le habla a nadie.' });
+    actions.push({ priority:'high', label:'Alta prioridad', text:'<b>Crea tu mensaje de posicionamiento en una línea.</b> ¿Qué haces, para quién y por qué eres diferente? Pruébalo con 5 personas de tu red.' });
+  } else if (p2 < 65) {
+    actions.push({ priority:'high', label:'Alta prioridad', text:'<b>Diseña un calendario de contenido de 30 días con tus 3 pilares temáticos.</b> La consistencia es más poderosa que la perfección. Un post diario mediocre supera a un post perfecto mensual.' });
+    actions.push({ priority:'medium', label:'Media prioridad', text:'<b>Pide al menos 3 testimonios de clientes reales esta semana.</b> No esperes a que lleguen solos. Un mensaje de WhatsApp basta: "¿Cómo te fue? ¿Puedo compartir tu experiencia?"' });
+  } else {
+    actions.push({ priority:'build', label:'Construcción', text:'<b>Implementa una secuencia de seguimiento post-venta.</b> El cliente que compró una vez tiene 5 veces más probabilidad de volver. ¿Tienes sistema para activar esa recompra?' });
+  }
+
+  // Pilar 3: Fundador
+  if (p3 < 40) {
+    actions.push({ priority:'urgent', label:'Urgente', text:'<b>Establece una hora de corte al trabajo esta semana y cúmplela 5 días seguidos.</b> No es opcional. Tu capacidad de decisión cae un 40% cuando operas agotado — y tu negocio paga esa factura.' });
+    actions.push({ priority:'urgent', label:'Urgente', text:'<b>Registra tu nivel de energía cada mañana del 1 al 10 durante 14 días.</b> Solo con ese dato ya tienes más información sobre tu rendimiento real que la mayoría de emprendedores.' });
+  } else if (p3 < 65) {
+    actions.push({ priority:'high', label:'Alta prioridad', text:'<b>Bloquea en tu calendario 3 espacios semanales de "tiempo de pensamiento".</b> No para ejecutar — para pensar en tu negocio. El que no tiene tiempo para pensar toma las peores decisiones.' });
+    actions.push({ priority:'medium', label:'Media prioridad', text:'<b>Define tus 3 tareas de mayor impacto para la semana todos los domingos.</b> Esas 3 van primero. Lo demás ocupa el espacio que queda.' });
+  } else {
+    actions.push({ priority:'build', label:'Construcción', text:'<b>Formaliza tu sistema de gestión del tiempo en un documento.</b> Lo que funciona para ti tiene que ser replicable en las semanas difíciles, no solo en las buenas.' });
+  }
+
+  // Universal actions based on profile
+  if (profile.id === 'embrion' || profile.id === 'caotico') {
+    actions.push({ priority:'medium', label:'Esta semana', text:'<b>Descarga la Guía de las 5 Bases para arrancar bien.</b> Está diseñada exactamente para donde estás tú ahora. Enlace en la bio de @yosoy.lei.' });
+  }
+
+  return actions.slice(0, 6);
+}
+
+function restartAssessment() {
+  currentQ = 0;
+  answers = new Array(45).fill(null);
+  selectedOption = null;
+  pillarsDone = [false, false, false];
+  pendingTransition = false;
+  showScreen('cover');
+}
+</script>
+</body>
+</html>
